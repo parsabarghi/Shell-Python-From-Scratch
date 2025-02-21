@@ -15,7 +15,7 @@ def handle_command(command: str) -> str:
     try: 
         if not command:
             return 
-        sys.stdout.write(f"{command}: command not found")
+        sys.stdout.write(f"{command}: command not found \n")
         sys.stdout.flush()
         
     except Exception as e:
@@ -29,11 +29,11 @@ def main():
         command = user_command()
         if command.lower() in ('exit', 'quit'):
             break
-        print(handle_command(command))
+        handle_command(command)
     
     # Wait for user input
     # new_command = input()
-    # print(f"{new_command}: command not found")
+    
 
 if __name__ == "__main__":
     main()
