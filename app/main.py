@@ -36,7 +36,7 @@ def handle_type(command: str) -> None:
     
     if command in default_command:
         sys.stdout.write(f"{command} is a shell builtin\n")
-    else: sys.stdout.write(f"{command}: command not found\n")
+    else: sys.stdout.write(f"{command}: not found\n")
 
 # def handle_command(command: str) -> str:
 #     """Handle user inputs and commands"""
