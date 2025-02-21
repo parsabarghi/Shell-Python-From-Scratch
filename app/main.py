@@ -13,12 +13,14 @@ def handle_inputline(inputline: str) -> None:
             handle_exit()
         case "echo":
             handle_echo(args)
+        case "type":
+            handle_type(args[0]) if args else sys.stderr(f"type should have an argument")
         case _: 
             sys.stdout.write(f"{inputline}: command not found\n")
 
             
 def handle_echo(args: list[str]) -> None:
-    
+    """handle echo command"""
     sys.stdout.write(f"{' '.join(args)}\n")
         
             
@@ -29,6 +31,12 @@ def handle_exit(code: str = "0") -> NoReturn:
     except ValueError:
         sys.exit(f"invalid exit code: {code}")
     
+def handle_type(command: str) -> None:
+    default_command = {"type", "exit", "echo"}
+    
+    if command in default_command:
+        sys.stdout.write(f"{command} is a shell builtin\n")
+    else: sys.stdout.write(f"{command}: command not found\n")
 
 # def handle_command(command: str) -> str:
 #     """Handle user inputs and commands"""
