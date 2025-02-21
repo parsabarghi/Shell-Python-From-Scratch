@@ -19,7 +19,7 @@ def handle_inputline(inputline: str) -> None:
             
 def handle_echo(args: list[str]) -> None:
     
-    sys.stdout.write(f"{''.join(args)}\n")
+    sys.stdout.write(f"{' '.join(args)}\n")
         
             
 def handle_exit(code: str = "0") -> NoReturn:
