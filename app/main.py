@@ -27,7 +27,7 @@ def main():
     # sys.stdout.write("$ ")
     while True: 
         command = user_command()
-        if command.lower() in ('exit', 'quit'):
+        if command.lower() in ('exit 0', 'quit'):
             break
         handle_command(command)
     
