@@ -1,6 +1,10 @@
 import sys
+import os
+import shutil
 from typing import NoReturn
+from pathlib import Path
 
+    
 
 def handle_inputline(inputline: str) -> None:
     """parse and handle the codes and text from input line"""
@@ -36,23 +40,18 @@ def handle_type(command: str) -> None:
     
     if command in default_command:
         sys.stdout.write(f"{command} is a shell builtin\n")
-    else: sys.stdout.write(f"{command}: not found\n")
-
-# def handle_command(command: str) -> str:
-#     """Handle user inputs and commands"""
-#     default_commands = ['exit', 'quit', 'type', 'echo']
-#     try: 
-#         if not command:
-#             return
-#         elif "echo" in command:
-#             sys.stdout.write(f"{command.replace('echo','').lstrip()}\n")
-#             sys.stdout.flush()
-#         else:
-#             sys.stdout.write(f"{command}: command not found \n")
-#             sys.stdout.flush()
-        
-#     except Exception as e:
-#         print(f"exception error: {e}")
+        return
+    
+    # Cross-platform executable search
+    exe_path = shutil.which(command)
+    
+    if exe_path:
+        # Convert Windows paths to Unix-style if needed
+        unix_path = Path(exe_path).as_posix()
+        sys.stdout.write(f"{command} is {unix_path}\n")
+    else:
+        sys.stdout.write(f"{command}: not found\n")
+    
 
 
 
