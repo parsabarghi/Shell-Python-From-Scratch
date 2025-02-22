@@ -20,7 +20,10 @@ def handle_inputline(inputline: str) -> None:
         case "type":
             handle_type(args[0]) if args else sys.stderr(f"type should have an argument")
         case _: 
-            sys.stdout.write(f"{inputline}: command not found\n")
+            if os.path.isfile(inputline.split(" ")[0]):
+                os.system(inputline)
+            else:
+                sys.stdout.write(f"{inputline}: command not found")
 
             
 def handle_echo(args: list[str]) -> None:
@@ -36,17 +39,16 @@ def handle_exit(code: str = "0") -> NoReturn:
         sys.exit(f"invalid exit code: {code}")
     
 def handle_type(command: str) -> None:
+    """Handle type command and be cross platform to pass the tests"""
     default_command = {"type", "exit", "echo"}
     
     if command in default_command:
         sys.stdout.write(f"{command} is a shell builtin\n")
         return
     
-    # Cross-platform executable search
     exe_path = shutil.which(command)
     
     if exe_path:
-        # Convert Windows paths to Unix-style if needed
         unix_path = Path(exe_path).as_posix()
         sys.stdout.write(f"{command} is {unix_path}\n")
     else:
