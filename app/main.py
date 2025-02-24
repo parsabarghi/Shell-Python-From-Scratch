@@ -19,12 +19,20 @@ def handle_inputline(inputline: str) -> None:
             handle_echo(args)
         case "type":
             handle_type(args[0] if args else "")
+        case "pwd":
+            handle_pwd()
         case _:
             exe_path = shutil.which(code)
             if exe_path:
                 execute_external(exe_path, code, args)
             else:
                 sys.stdout.write(f"{code}: command not found\n")
+
+def handle_pwd() -> None:
+    """Handle the PWD command and get the current dir"""
+    current_dir = Path.cwd()
+    sys.stdout.write(f"{current_dir}\n")
+
 
 def execute_external(exe_path: str, command: str, args: list[str]) -> None:
     """Execute external program with arguments"""
@@ -42,6 +50,8 @@ def execute_external(exe_path: str, command: str, args: list[str]) -> None:
         sys.stderr.write(f"{command}: Permission denied\n")
     except Exception as e:
         sys.stderr.write(f"Error executing {command}: {str(e)}\n")
+        
+
 
 
 def handle_echo(args: list[str]) -> None:
