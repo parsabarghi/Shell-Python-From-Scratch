@@ -68,7 +68,7 @@ def handle_exit(code: str = "0") -> NoReturn:
     
 def handle_type(command: str) -> None:
     """Handle type command and be cross platform to pass the tests"""
-    default_command = {"type", "exit", "echo"}
+    default_command = {"type", "exit", "echo", "pwd"}
     
     if command in default_command:
         sys.stdout.write(f"{command} is a shell builtin\n")
