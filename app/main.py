@@ -1,5 +1,6 @@
 import sys
 import shutil
+import os
 import subprocess
 from typing import NoReturn
 from pathlib import Path
@@ -21,17 +22,14 @@ def handle_inputline(inputline: str) -> None:
             handle_type(args[0] if args else "")
         case "pwd":
             handle_pwd()
+        case "cd":
+            handle_cd(args[0] if args else "")
         case _:
             exe_path = shutil.which(code)
             if exe_path:
                 execute_external(exe_path, code, args)
             else:
                 sys.stdout.write(f"{code}: command not found\n")
-
-def handle_pwd() -> None:
-    """Handle the PWD command and get the current dir"""
-    current_dir = Path.cwd()
-    sys.stdout.write(f"{current_dir}\n")
 
 
 def execute_external(exe_path: str, command: str, args: list[str]) -> None:
@@ -52,8 +50,19 @@ def execute_external(exe_path: str, command: str, args: list[str]) -> None:
         sys.stderr.write(f"Error executing {command}: {str(e)}\n")
         
 
+def handle_pwd() -> None:
+    """Handle the PWD command and get the current dir"""
+    current_dir = Path.cwd()
+    sys.stdout.write(f"{current_dir}\n")
 
-
+def handle_cd(directory: str) -> None:
+    """handle the cd command and change the current dir"""
+    try: 
+        os.chdir(directory)
+    except OSError:
+        print(f"cd: {directory}: No such file or directory")
+    
+    
 def handle_echo(args: list[str]) -> None:
     """handle echo command"""
     sys.stdout.write(f"{' '.join(args)}\n")
@@ -68,7 +77,7 @@ def handle_exit(code: str = "0") -> NoReturn:
     
 def handle_type(command: str) -> None:
     """Handle type command and be cross platform to pass the tests"""
-    default_command = {"type", "exit", "echo", "pwd"}
+    default_command = {"type", "exit", "echo", "pwd", "cd"}
     
     if command in default_command:
         sys.stdout.write(f"{command} is a shell builtin\n")
