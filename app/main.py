@@ -1,16 +1,16 @@
 import sys
 import shutil
-import os
+import subprocess
 from typing import NoReturn
 from pathlib import Path
 
     
 
 def handle_inputline(inputline: str) -> None:
-    """parse and handle the codes and text from input line"""
-    
-    code, *args = inputline.strip().split(maxsplit=1) # make command to two part
-    args = args[0].split() if args else []
+    """Parse and route commands to appropriate handlers"""
+    parts = inputline.strip().split(maxsplit=1)
+    code = parts[0] if parts else ""
+    args = parts[1].split() if len(parts) > 1 else []
     
     match code:
         case "exit":
@@ -18,16 +18,32 @@ def handle_inputline(inputline: str) -> None:
         case "echo":
             handle_echo(args)
         case "type":
-            handle_type(args[0]) if args else sys.stderr(f"type should have an argument")
+            handle_type(args[0] if args else "")
         case _:
-            exe_path = shutil.which(inputline)
+            exe_path = shutil.which(code)
             if exe_path:
-                unix_path = Path(exe_path).as_posix()
-                os.path.isfile(unix_path.split(" ")[0])
-                os.system(unix_path)
-            else: sys.stdout.write(f"{inputline}: command not found\n")
+                execute_external(exe_path, code, args)
+            else:
+                sys.stdout.write(f"{code}: command not found\n")
 
-            
+def execute_external(exe_path: str, command: str, args: list[str]) -> None:
+    """Execute external program with arguments"""
+    try:
+        process = subprocess.run(
+            [command] + args,  
+            executable=exe_path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        sys.stdout.write(process.stdout)
+        sys.stderr.write(process.stderr)
+    except PermissionError:
+        sys.stderr.write(f"{command}: Permission denied\n")
+    except Exception as e:
+        sys.stderr.write(f"Error executing {command}: {str(e)}\n")
+
+
 def handle_echo(args: list[str]) -> None:
     """handle echo command"""
     sys.stdout.write(f"{' '.join(args)}\n")
@@ -55,6 +71,8 @@ def handle_type(command: str) -> None:
         sys.stdout.write(f"{command} is {unix_path}\n")
     else:
         sys.stdout.write(f"{command}: not found\n")
+
+
     
 
 def main():
@@ -63,11 +81,17 @@ def main():
     # sys.stdout.write("$ ")
     while True:
         try:
-            handle_inputline(input("$ "))
+            sys.stdout.write("$ ")
+            sys.stdout.flush()
+            inputline = sys.stdin.readline().strip()
+            if not inputline:
+                continue
+            handle_inputline(inputline)
         except (EOFError, KeyboardInterrupt):
-            sys.stderr("\n Exiting")
+            sys.stdout.write("\n")
+            sys.exit(0)
         except Exception as e:
-            sys.stderr(f"exception error: {e}")
+            sys.stderr.write(f"Error: {str(e)}\n")
     # Wait for user input
     # new_command = input()
     
