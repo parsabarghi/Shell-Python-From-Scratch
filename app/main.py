@@ -25,7 +25,7 @@ def handle_inputline(inputline: str) -> None:
                 unix_path = Path(exe_path).as_posix()
                 os.path.isfile(unix_path.split(" ")[0])
                 os.system(unix_path)
-            sys.stdout.write(f"{inputline}: command not found\n")
+            else: sys.stdout.write(f"{inputline}: command not found\n")
 
             
 def handle_echo(args: list[str]) -> None:
