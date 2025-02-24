@@ -58,7 +58,11 @@ def handle_pwd() -> None:
 def handle_cd(directory: str) -> None:
     """handle the cd command and change the current dir"""
     try: 
-        os.chdir(directory)
+        if directory == "~":
+            home = os.path.expanduser("~")
+            # print(home)
+            os.chdir(home)
+        else: os.chdir(directory)
     except OSError:
         print(f"cd: {directory}: No such file or directory")
     
