@@ -22,7 +22,8 @@ def handle_inputline(inputline: str) -> None:
         case _:
             exe_path = shutil.which(inputline)
             if exe_path:
-                unix_path = Path(exe_path).as_posix().split((" "))[0]
+                unix_path = Path(exe_path).as_posix()
+                os.path.isfile(unix_path.split(" ")[0])
                 os.system(unix_path)
             sys.stdout.write(f"{inputline}: command not found\n")
 
