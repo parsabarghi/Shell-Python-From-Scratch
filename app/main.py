@@ -2,34 +2,33 @@ import sys
 import shutil
 import os
 import subprocess
+import shlex
 from typing import NoReturn
 from pathlib import Path
 
+COMMAND_MAP = {
+    "exit": lambda _: handle_exit(),
+    "echo": lambda args: handle_echo(args),
+    "type": lambda args: handle_type(args[0] if args else ""),
+    "pwd": lambda _: handle_pwd(),
+    "cd": lambda args: handle_cd(args[0] if args else ""),
+}
     
 
 def handle_inputline(inputline: str) -> None:
     """Parse and route commands to appropriate handlers"""
-    parts = inputline.strip().split(maxsplit=1)
+    parts = shlex.split(inputline.strip())
     code = parts[0] if parts else ""
     args = parts[1].split() if len(parts) > 1 else []
     
-    match code:
-        case "exit":
-            handle_exit()
-        case "echo":
-            handle_echo(args)
-        case "type":
-            handle_type(args[0] if args else "")
-        case "pwd":
-            handle_pwd()
-        case "cd":
-            handle_cd(args[0] if args else "")
-        case _:
-            exe_path = shutil.which(code)
-            if exe_path:
-                execute_external(exe_path, code, args)
-            else:
-                sys.stdout.write(f"{code}: command not found\n")
+    if code in COMMAND_MAP:
+        COMMAND_MAP[code](args)
+    else:
+        exe_path = shutil.which(code)
+        if exe_path:
+            execute_external(exe_path, code, args)
+        else:
+            sys.stdout.write(f"{code}: command not found\n")
 
 
 def execute_external(exe_path: str, command: str, args: list[str]) -> None:
@@ -81,9 +80,8 @@ def handle_exit(code: str = "0") -> NoReturn:
     
 def handle_type(command: str) -> None:
     """Handle type command and be cross platform to pass the tests"""
-    default_command = {"type", "exit", "echo", "pwd", "cd"}
     
-    if command in default_command:
+    if command in COMMAND_MAP:
         sys.stdout.write(f"{command} is a shell builtin\n")
         return
     
