@@ -19,7 +19,7 @@ def handle_inputline(inputline: str) -> None:
     """Parse and route commands to appropriate handlers"""
     parts = shlex.split(inputline.strip())
     code = parts[0] if parts else ""
-    args = parts[1].split() if len(parts) > 1 else []
+    args = parts[1::] if len(parts) > 1 else []
     
     if code in COMMAND_MAP:
         COMMAND_MAP[code](args)
