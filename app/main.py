@@ -1,6 +1,6 @@
 import sys
-import os
 import shutil
+import os
 from typing import NoReturn
 from pathlib import Path
 
@@ -19,11 +19,12 @@ def handle_inputline(inputline: str) -> None:
             handle_echo(args)
         case "type":
             handle_type(args[0]) if args else sys.stderr(f"type should have an argument")
-        case _: 
-            if os.path.isfile(inputline.split(" ")[0]):
-                os.system(inputline)
-            else:
-                sys.stdout.write(f"{inputline}: command not found")
+        case _:
+            exe_path = shutil.which(inputline)
+            if exe_path:
+                unix_path = Path(exe_path).as_posix().split((" "))[0]
+                os.system(unix_path)
+            sys.stdout.write(f"{inputline}: command not found\n")
 
             
 def handle_echo(args: list[str]) -> None:
@@ -54,8 +55,6 @@ def handle_type(command: str) -> None:
     else:
         sys.stdout.write(f"{command}: not found\n")
     
-
-
 
 def main():
     """REPL Loop"""
