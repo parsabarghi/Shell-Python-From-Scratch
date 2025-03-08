@@ -68,7 +68,15 @@ def handle_cd(directory: str) -> None:
     
 def handle_echo(args: list[str]) -> None:
     """handle echo command"""
-    sys.stdout.write(f"{' '.join(args)}\n")
+    redirect_index = next(i for i, t in enumerate(args) if t in (">", "1>"))
+    file_name = args[redirect_index + 1]
+    text = args[:redirect_index]
+    
+    if redirect_index is not None:
+        with open(file_name, 'w') as f:
+            subprocess.run(text, stdout=f)
+        
+    else: sys.stdout.write(f"{' '.join(args)}\n")
         
             
 def handle_exit(code: str = "0") -> NoReturn:
