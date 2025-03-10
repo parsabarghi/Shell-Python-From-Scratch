@@ -18,9 +18,13 @@ COMMAND_MAP = {
 def handle_inputline(inputline: str) -> None:
     """Parse and route commands to appropriate handlers"""
     parts = shlex.split(inputline.strip())
+    # redirect_index = next(i for i, t in enumerate(args) if t in (">", "1>", "2>"))
     code = parts[0] if parts else ""
     args = parts[1::] if len(parts) > 1 else []
     
+    if any(redir in args for redir in ('>', '1>', '2>')):
+        handle_redirect(command=(' '.join(parts)))
+        return
     if code in COMMAND_MAP:
         COMMAND_MAP[code](args)
     else:
@@ -30,6 +34,12 @@ def handle_inputline(inputline: str) -> None:
         else:
             sys.stdout.write(f"{code}: command not found\n")
 
+
+def handle_redirect(command: str):
+    try: 
+        os.system(command)
+    except Exception as e:
+        sys.stderr.write(f"Exception error on redirection: {e}")
 
 def execute_external(exe_path: str, command: str, args: list[str]) -> None:
     """Execute external program with arguments"""
@@ -68,15 +78,7 @@ def handle_cd(directory: str) -> None:
     
 def handle_echo(args: list[str]) -> None:
     """handle echo command"""
-    redirect_index = next(i for i, t in enumerate(args) if t in (">", "1>"))
-    file_name = args[redirect_index + 1]
-    text = args[:redirect_index]
-    
-    if redirect_index is not None:
-        with open(file_name, 'w') as f:
-            subprocess.run(text, stdout=f)
-        
-    else: sys.stdout.write(f"{' '.join(args)}\n")
+    sys.stdout.write(f"{' '.join(args)}\n")
         
             
 def handle_exit(code: str = "0") -> NoReturn:
