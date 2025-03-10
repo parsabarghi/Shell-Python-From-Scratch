@@ -22,7 +22,7 @@ def handle_inputline(inputline: str) -> None:
     code = parts[0] if parts else ""
     args = parts[1::] if len(parts) > 1 else []
     
-    if any(redir in args for redir in ('>', '1>', '2>')):
+    if any(redir in args for redir in ('>', '1>', '2>', '>>', '1>>', '2>>')):
         handle_redirect(command=(' '.join(parts)))
         return
     if code in COMMAND_MAP:
