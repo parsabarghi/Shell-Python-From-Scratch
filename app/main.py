@@ -2,9 +2,7 @@ import sys
 import shutil
 import os
 import subprocess
-import shlex
-import readline
-# from pyreadline import Readline
+import shlex 
 from typing import NoReturn
 from pathlib import Path
 
@@ -12,6 +10,11 @@ import collections
 from collections.abc import Callable
 if not hasattr(collections, 'Callable'):
     collections.Callable = Callable
+
+try:
+    from pyreadline import Readline # windows
+except ImportError:
+    import readline  # Unix/Mac
 
 COMMAND_MAP = {
     "exit": lambda _: handle_exit(),
@@ -41,15 +44,33 @@ def handle_inputline(inputline: str) -> None:
         else:
             sys.stdout.write(f"{code}: command not found\n")
             
-def handle_completer(text: str, state: int) -> str | None:  
-    """Handle autocompletion using <tab>"""
-    similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
+# def handle_completer(text: str, state: int) -> str | None:  
+#     """Handle autocompletion using <tab>"""
+#     similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
     
+#     if len(text) == 0:
+#         return
+#     elif state < len(similarity): 
+#         return f"{similarity[state]}"
+#     else: return None
+    
+def handle_completer(text: str, state: int) -> str | None:
+    """Universal completer for all platforms"""
+    cmds = sorted(COMMAND_MAP.keys())
+    matches = [c for c in cmds if c.startswith(text)]
+    
+    # Empty TAB: show commands and keep prompt
     if len(text) == 0:
-        return
-    elif state < len(similarity): 
-        return f"{similarity[state]}"
-    else: return None
+        return 
+    elif not text and state == 0:
+        cols = shutil.get_terminal_size().columns // 12
+        print('\n' + '\n'.join(' '.join(cmds[i:i+cols]) for i in range(0, len(cmds), cols)))
+        print("$ ", end="", flush=True)
+        return None
+    
+    return f"{matches[state]} " if state < len(matches) else None
+
+
     
     
 
@@ -131,7 +152,7 @@ def main():
     # Uncomment this block to pass the first stage
     # sys.stdout.write("$ ")
     
-    # readline = Readline()
+    readline = Readline()
     readline.set_completer(handle_completer)
     readline.parse_and_bind("tab: complete")
     readline.set_completer_delims(' \t\n')  
