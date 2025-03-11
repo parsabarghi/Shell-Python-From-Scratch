@@ -27,6 +27,7 @@ def handle_inputline(inputline: str) -> None:
     code = parts[0] if parts else ""
     args = parts[1::] if len(parts) > 1 else []
     
+    
     if any(redir in args for redir in ('>', '1>', '2>', '>>', '1>>', '2>>')):
         handle_redirect(command=(' '.join(parts)))
         return
@@ -43,11 +44,13 @@ def handle_completer(text: str, state: int) -> str | None:
     """Handle autocompletion using <tab>"""
     similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
     
-    if state >= len(similarity): 
-        return None
+    if len(text) == 0:
+        return
+    elif state < len(similarity): 
+        return f"{similarity[state]}"
+    else: return None
     
     
-    return f"{similarity[state]} "
 
 
 def handle_redirect(command: str) -> None:
