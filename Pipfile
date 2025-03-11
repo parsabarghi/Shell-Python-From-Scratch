@@ -12,7 +12,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyreadline = "*"
+pyreadline3 = "*"
+gnureadline = "*"
 
 [dev-packages]
 
