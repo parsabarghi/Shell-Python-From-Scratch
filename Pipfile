@@ -13,6 +13,7 @@ name = "pypi"
 
 [packages]
 pyreadline = "2.1"
+readline = "6.2.4.2"
 
 [dev-packages]
 
