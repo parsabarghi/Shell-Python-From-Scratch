@@ -3,8 +3,14 @@ import shutil
 import os
 import subprocess
 import shlex
+from pyreadline import Readline
 from typing import NoReturn
 from pathlib import Path
+
+import collections
+from collections.abc import Callable
+if not hasattr(collections, 'Callable'):
+    collections.Callable = Callable
 
 COMMAND_MAP = {
     "exit": lambda _: handle_exit(),
@@ -18,7 +24,6 @@ COMMAND_MAP = {
 def handle_inputline(inputline: str) -> None:
     """Parse and route commands to appropriate handlers"""
     parts = shlex.split(inputline.strip())
-    # redirect_index = next(i for i, t in enumerate(args) if t in (">", "1>", "2>"))
     code = parts[0] if parts else ""
     args = parts[1::] if len(parts) > 1 else []
     
@@ -33,9 +38,20 @@ def handle_inputline(inputline: str) -> None:
             execute_external(exe_path, code, args)
         else:
             sys.stdout.write(f"{code}: command not found\n")
+            
+def handle_completer(text: str, state: int) -> str | None:  
+    """Handle autocompletion using <tab>"""
+    similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
+    
+    if state >= len(similarity): 
+        return None
+    
+    
+    return f"{similarity[state]} "
 
 
-def handle_redirect(command: str):
+def handle_redirect(command: str) -> None:
+    """Handle redirections"""
     try: 
         os.system(command)
     except Exception as e:
@@ -110,11 +126,17 @@ def main():
     """REPL Loop"""
     # Uncomment this block to pass the first stage
     # sys.stdout.write("$ ")
+    
+    readline = Readline()
+    readline.set_completer(handle_completer)
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer_delims(' \t\n')  
+    
     while True:
         try:
             sys.stdout.write("$ ")
             sys.stdout.flush()
-            inputline = sys.stdin.readline().strip()
+            inputline = readline.readline().strip()
             if not inputline:
                 continue
             handle_inputline(inputline)
