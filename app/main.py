@@ -3,7 +3,8 @@ import shutil
 import os
 import subprocess
 import shlex
-from pyreadline import Readline
+import readline
+# from pyreadline import Readline
 from typing import NoReturn
 from pathlib import Path
 
@@ -130,7 +131,7 @@ def main():
     # Uncomment this block to pass the first stage
     # sys.stdout.write("$ ")
     
-    readline = Readline()
+    # readline = Readline()
     readline.set_completer(handle_completer)
     readline.parse_and_bind("tab: complete")
     readline.set_completer_delims(' \t\n')  
