@@ -12,7 +12,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyreadline
+pyreadline = "2.1"
 
 [dev-packages]
 
