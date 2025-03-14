@@ -12,8 +12,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-readline = "6.2.4.2"
-gnureadline = "8.2.13"
+
 
 [dev-packages]
 
