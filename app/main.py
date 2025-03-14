@@ -8,11 +8,6 @@ import readline
 from typing import NoReturn
 from pathlib import Path
 
-import collections
-from collections.abc import Callable
-if not hasattr(collections, 'Callable'):
-    collections.Callable = Callable
-
 COMMAND_MAP = {
     "exit": lambda _: handle_exit(),
     "echo": lambda args: handle_echo(args),
@@ -49,7 +44,8 @@ def handle_completer(text: str, state: int) -> str | None:
         return
     elif state < len(similarity): 
         return f"{similarity[state]}"
-    else: return None
+    else:
+        return None
     
     
 
@@ -91,7 +87,8 @@ def handle_cd(directory: str) -> None:
             home = os.path.expanduser("~")
             # print(home)
             os.chdir(home)
-        else: os.chdir(directory)
+        else:
+            os.chdir(directory)
     except OSError:
         print(f"cd: {directory}: No such file or directory")
     
@@ -131,7 +128,6 @@ def main():
     # Uncomment this block to pass the first stage
     # sys.stdout.write("$ ")
     
-    # readline = Readline()
     readline.set_completer(handle_completer)
     readline.parse_and_bind("tab: complete")
     readline.set_completer_delims(' \t\n')  
@@ -140,7 +136,7 @@ def main():
         try:
             sys.stdout.write("$ ")
             sys.stdout.flush()
-            inputline = readline.readline().strip()
+            inputline = input()
             if not inputline:
                 continue
             handle_inputline(inputline)
