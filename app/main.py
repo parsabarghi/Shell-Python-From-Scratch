@@ -43,7 +43,7 @@ def handle_completer(text: str, state: int) -> str | None:
     if len(text) == 0:
         return
     elif state < len(similarity): 
-        return f"{similarity[state]}"
+        return f"{similarity[state]} "
     else:
         return None
     
