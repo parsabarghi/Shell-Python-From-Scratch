@@ -36,17 +36,31 @@ def handle_inputline(inputline: str) -> None:
         else:
             sys.stdout.write(f"{code}: command not found\n")
             
-def handle_completer(text: str, state: int) -> str | None:  
+        
+def handle_completer(text: str, state: int) -> str | None:
     """Handle autocompletion using <tab>"""
-    similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
+    internal_matches = [cmd for cmd in COMMAND_MAP.keys() 
+                        if cmd.startswith(text)]
     
-    if len(text) == 0:
-        return
-    elif state < len(similarity): 
-        return f"{similarity[state]} "
-    else:
-        return None
+    external_matches = []
+    seen = set()
     
+    for dir_path in os.environ.get("PATH", "").split(os.pathsep):
+        if not os.path.isdir(dir_path):
+            continue
+        try:
+            with os.scandir(dir_path) as entries:  
+                for entry in entries:
+                    if entry.name in seen or not entry.name.startswith(text):
+                        continue
+                    if entry.is_file() and os.access(entry.path, os.X_OK):
+                        external_matches.append(entry.name)
+                        seen.add(entry.name)
+        except OSError:
+            continue
+    
+    all_matches = sorted(internal_matches + external_matches)
+    return f"{all_matches[state]} " if state < len(all_matches) else None
     
 
 
@@ -130,7 +144,7 @@ def main():
     
     readline.set_completer(handle_completer)
     readline.parse_and_bind("tab: complete")
-    readline.set_completer_delims(' \t\n')  
+    readline.set_completer_delims(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>?')  
     
     while True:
         try:
