@@ -35,6 +35,18 @@ def handle_inputline(inputline: str) -> None:
             execute_external(exe_path, code, args)
         else:
             sys.stdout.write(f"{code}: command not found\n")
+
+def handle_show_matches(substitution: str, matches: list[str], longest_match_length) -> None:
+
+    try:
+        sys.stdout.write("\n")
+        sys.stdout.write(" ".join(matches) + "\n")
+        sys.stdout.write(f"$ {substitution}")
+        sys.stdout.flush()
+        readline.redisplay()
+
+    except Exception as e:
+        sys.stderr.write(f"{e}")
             
         
 def handle_completer(text: str, state: int) -> str | None:
@@ -143,6 +155,7 @@ def main():
     # sys.stdout.write("$ ")
     
     readline.set_completer(handle_completer)
+    readline.set_completion_display_matches_hook(handle_show_matches)
     readline.parse_and_bind("tab: complete")
     readline.set_completer_delims(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>?')  
     
