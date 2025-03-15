@@ -40,10 +40,25 @@ def handle_completer(text: str, state: int) -> str | None:
     """Handle autocompletion using <tab>"""
     similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
     
+    externals = []
+    seen = set()
+    for path_dir in os.environ.get("PATH", "").split(os.pathsep):
+        if not os.path.isdir(path_dir):
+            continue
+
+        for entry in os.scandir(path_dir):
+            if entry.name.startswith(text) and entry.name not in seen:
+
+                if shutil.which(entry.name):
+                    externals.append(entry.name)
+                    seen.add(entry.name)
+    
+    matches = sorted(similarity + externals)
+    
     if len(text) == 0:
         return
-    elif state < len(similarity): 
-        return f"{similarity[state]} "
+    elif state < len(matches): 
+        return f"{matches[state]} "
     else:
         return None
     
