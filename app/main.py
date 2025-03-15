@@ -21,20 +21,21 @@ def handle_inputline(inputline: str) -> None:
     """Parse and route commands to appropriate handlers"""
     parts = shlex.split(inputline.strip())
     code = parts[0] if parts else ""
+    clean_code = code.strip('\'"')
     args = parts[1::] if len(parts) > 1 else []
     
     
     if any(redir in args for redir in ('>', '1>', '2>', '>>', '1>>', '2>>')):
         handle_redirect(command=(' '.join(parts)))
         return
-    if code in COMMAND_MAP:
+    if clean_code in COMMAND_MAP:
         COMMAND_MAP[code](args)
     else:
-        exe_path = shutil.which(code)
+        exe_path = shutil.which(clean_code)
         if exe_path:
-            execute_external(exe_path, code, args)
+            execute_external(exe_path, clean_code, args)
         else:
-            sys.stdout.write(f"{code}: command not found\n")
+            sys.stdout.write(f"{clean_code}: command not found\n")
             
 def handle_completer(text: str, state: int) -> str | None:  
     """Handle autocompletion using <tab>"""
