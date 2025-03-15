@@ -37,7 +37,7 @@ def handle_inputline(inputline: str) -> None:
             sys.stdout.write(f"{code}: command not found\n")
 
 def handle_show_matches(substitution: str, matches: list[str], longest_match_length) -> None:
-
+    """Handle to show matches when click twice the tab"""
     try:
         sys.stdout.write("\n")
         sys.stdout.write(" ".join(matches) + "\n")
