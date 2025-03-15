@@ -18,75 +18,44 @@ COMMAND_MAP = {
     
 
 def handle_inputline(inputline: str) -> None:
-    """ Handling user input """
-    try:
-        parts = shlex.split(inputline.strip(), posix=True)
-    except ValueError as e:
-        sys.stderr.write(f"Syntax error: {str(e)}\n")
-        return
-
-    if not parts:
-        return
-
+    """Parse and route commands to appropriate handlers"""
+    parts = shlex.split(inputline.strip())
+    code = parts[0] if parts else ""
+    args = parts[1::] if len(parts) > 1 else []
     
-    if any(redir in parts for redir in ('>', '>>', '2>', '2>>')):
-        handle_redirect(inputline.strip())  
-        return
-
-    code = parts[0]
-    args = parts[1:]
     
-   
-    code_clean = code.strip('\'"')
-    if code_clean in COMMAND_MAP:
-        COMMAND_MAP[code_clean](args)
+    if any(redir in args for redir in ('>', '1>', '2>', '>>', '1>>', '2>>')):
+        handle_redirect(command=(' '.join(parts)))
+        return
+    if code in COMMAND_MAP:
+        COMMAND_MAP[code](args)
     else:
-        exe_path = shutil.which(code_clean)
+        exe_path = shutil.which(code)
         if exe_path:
-            execute_external(exe_path, code_clean, args)
+            execute_external(exe_path, code, args)
         else:
-            sys.stdout.write(f"{code_clean}: command not found\n")
-
-
+            sys.stdout.write(f"{code}: command not found\n")
+            
 def handle_completer(text: str, state: int) -> str | None:  
     """Handle autocompletion using <tab>"""
     similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
     
-    externals = []
-    seen = set()
-    for path_dir in os.environ.get("PATH", "").split(os.pathsep):
-        if not os.path.isdir(path_dir):
-            continue
-
-        for entry in os.scandir(path_dir):
-            if entry.name.startswith(text) and entry.name not in seen:
-
-                if shutil.which(entry.name):
-                    externals.append(entry.name)
-                    seen.add(entry.name)
-    
-    matches = sorted(similarity + externals)
-    
     if len(text) == 0:
         return
-    elif state < len(matches): 
-        return f"{matches[state]} "
+    elif state < len(similarity): 
+        return f"{similarity[state]} "
     else:
         return None
     
     
+
+
 def handle_redirect(command: str) -> None:
-    try:
-        subprocess.run(
-            command,
-            shell=True,
-            executable="/bin/bash" if os.name != 'nt' else None,
-            stderr=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            check=False
-        )
+    """Handle redirections"""
+    try: 
+        os.system(command)
     except Exception as e:
-        sys.stderr.write(f"Redirection error: {str(e)}\n")
+        sys.stderr.write(f"Exception error on redirection: {e}")
 
 def execute_external(exe_path: str, command: str, args: list[str]) -> None:
     """Execute external program with arguments"""
