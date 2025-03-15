@@ -18,25 +18,36 @@ COMMAND_MAP = {
     
 
 def handle_inputline(inputline: str) -> None:
-    """Parse and route commands to appropriate handlers"""
-    parts = shlex.split(inputline.strip())
-    code = parts[0] if parts else ""
-    clean_code = code.strip('\'"')
-    args = parts[1::] if len(parts) > 1 else []
-    
-    
-    if any(redir in args for redir in ('>', '1>', '2>', '>>', '1>>', '2>>')):
-        handle_redirect(command=(' '.join(parts)))
+    """ Handling user input """
+    try:
+        parts = shlex.split(inputline.strip(), posix=True)
+    except ValueError as e:
+        sys.stderr.write(f"Syntax error: {str(e)}\n")
         return
-    if clean_code in COMMAND_MAP:
-        COMMAND_MAP[code](args)
+
+    if not parts:
+        return
+
+    
+    if any(redir in parts for redir in ('>', '>>', '2>', '2>>')):
+        handle_redirect(inputline.strip())  
+        return
+
+    code = parts[0]
+    args = parts[1:]
+    
+   
+    code_clean = code.strip('\'"')
+    if code_clean in COMMAND_MAP:
+        COMMAND_MAP[code_clean](args)
     else:
-        exe_path = shutil.which(clean_code)
+        exe_path = shutil.which(code_clean)
         if exe_path:
-            execute_external(exe_path, clean_code, args)
+            execute_external(exe_path, code_clean, args)
         else:
-            sys.stdout.write(f"{clean_code}: command not found\n")
-            
+            sys.stdout.write(f"{code_clean}: command not found\n")
+
+
 def handle_completer(text: str, state: int) -> str | None:  
     """Handle autocompletion using <tab>"""
     similarity = [i for i in COMMAND_MAP.keys() if i.startswith(text)]
@@ -64,14 +75,18 @@ def handle_completer(text: str, state: int) -> str | None:
         return None
     
     
-
-
 def handle_redirect(command: str) -> None:
-    """Handle redirections"""
-    try: 
-        os.system(command)
+    try:
+        subprocess.run(
+            command,
+            shell=True,
+            executable="/bin/bash" if os.name != 'nt' else None,
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            check=False
+        )
     except Exception as e:
-        sys.stderr.write(f"Exception error on redirection: {e}")
+        sys.stderr.write(f"Redirection error: {str(e)}\n")
 
 def execute_external(exe_path: str, command: str, args: list[str]) -> None:
     """Execute external program with arguments"""
